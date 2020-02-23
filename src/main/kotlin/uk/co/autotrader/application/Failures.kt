@@ -90,6 +90,8 @@ class MemoryLeakOom : Failure {
 
         while (true) {
             allocatedMemory.add(ByteArray(1000))
+            val delay = params.getOrDefault("delay", "0").toLong()
+            Thread.sleep(delay)
         }
     }
 }
