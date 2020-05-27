@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.contracts.model.structure.UNKNOWN_COMPUTATION.type
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -18,6 +19,20 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    create("intTest") {
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+    }
+}
+
+val intTestImplementation: Configuration by configurations.getting {
+    extendsFrom(configurations.implementation.get())
+    extendsFrom(configurations.testImplementation.get())
+}
+
+configurations["intTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
@@ -32,6 +47,8 @@ dependencies {
     testImplementation("com.natpryce:hamkrest:1.7.0.0")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
     testImplementation("org.springframework.restdocs:spring-restdocs-webtestclient")
+    testImplementation("org.testcontainers:testcontainers:1.13.0")
+    testImplementation("org.testcontainers:junit-jupiter:1.13.0")
 }
 
 val snippetsDir by extra { file("build/generated-snippets") }
@@ -43,9 +60,23 @@ tasks.withType<KotlinCompile>() {
     }
 }
 
+val integrationTest = task<Test>("integrationTest") {
+    description = "Runs integration tests."
+    group = "verification"
+
+    useJUnitPlatform {
+        includeTags("integration")
+    }
+
+    testClassesDirs = sourceSets["intTest"].output.classesDirs
+    classpath = sourceSets["intTest"].runtimeClasspath
+}
+
 tasks {
     test {
-        useJUnitPlatform()
+        useJUnitPlatform {
+            excludeTags("integration")
+        }
         testLogging {
             events("passed", "skipped", "failed")
         }
@@ -64,6 +95,7 @@ tasks {
         }
     }
 }
+
 
 publishing {
     publications {

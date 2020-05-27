@@ -1,15 +1,18 @@
 package uk.co.autotrader.application
 
+import org.springframework.boot.ExitCodeGenerator
+import org.springframework.boot.SpringApplication
+import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
-import kotlin.system.exitProcess
+
 
 interface SystemExit {
     fun exit(status: Int)
 }
 
 @Component
-class SystemExitImpl : SystemExit {
+class SystemExitImpl(val applicationContext: ApplicationContext) : SystemExit {
     override fun exit(status: Int) {
-        exitProcess(status)
+        SpringApplication.exit(applicationContext, ExitCodeGenerator { status })
     }
 }

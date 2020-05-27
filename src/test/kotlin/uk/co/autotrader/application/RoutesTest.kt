@@ -63,7 +63,7 @@ class SimulateRouteShould(
         @Qualifier("custom") val customFailure: CustomFailure) {
 
     @MockBean
-    lateinit var systemExit: SystemExit
+    private lateinit var systemExit: SystemExit
 
     private lateinit var webTestClient: WebTestClient
 
@@ -176,8 +176,10 @@ class CustomFailure : Failure {
 
 @Configuration
 class TestConfig {
+
     @Bean("custom")
     fun custom(): Failure {
         return CustomFailure()
     }
+
 }
