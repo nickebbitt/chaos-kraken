@@ -1,23 +1,30 @@
 package uk.co.autotrader.application
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mockito
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationContext
 import org.springframework.restdocs.RestDocumentationContextProvider
 import org.springframework.restdocs.RestDocumentationExtension
 import org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.co.autotrader.application.simulations.SystemExit
 
 @ExtendWith(SpringExtension::class, RestDocumentationExtension::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class SimulationControllerShould(private val context: ApplicationContext,
-                                 @LocalServerPort val randomServerPort: Int) {
+@DisplayName("SimulationController should")
+class SimulationControllerShould(private val context: ApplicationContext) {
 
     private lateinit var webTestClient: WebTestClient
+    @MockBean
+    private lateinit var systemExit: SystemExit
+
 
     @BeforeEach
     fun setup(restDocumentation: RestDocumentationContextProvider) {
@@ -31,7 +38,26 @@ class SimulationControllerShould(private val context: ApplicationContext,
                 .exchange()
                 .expectStatus().isOk
                 .expectBody()
+                .consumeWith { exchangeResult ->
+                    assertThat(exchangeResult.responseBody).isEqualTo("cpu simulation started".toByteArray())
+                }
                 .consumeWith(WebTestClientRestDocumentation.document("cpu"))
+
+    }
+
+    @Test
+    fun `trigger killapp failure`() {
+        webTestClient.post()
+                .uri("/simulate/v2/killapp")
+                .exchange()
+                .expectStatus().isOk
+                .expectBody()
+                .consumeWith { exchangeResult ->
+                    assertThat(exchangeResult.responseBody).isEqualTo("killapp simulation started".toByteArray())
+                }
+                .consumeWith(WebTestClientRestDocumentation.document("killapp"))
+
+        Mockito.verify(systemExit, Mockito.times(1)).exit(1)
 
     }
 }

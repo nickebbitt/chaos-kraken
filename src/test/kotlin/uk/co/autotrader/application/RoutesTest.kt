@@ -4,11 +4,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
@@ -63,9 +60,6 @@ class SimulateRouteShould(
         @LocalServerPort val randomServerPort: Int,
         @Qualifier("custom") val customFailure: CustomFailure) {
 
-    @MockBean
-    lateinit var systemExit: SystemExit
-
     private lateinit var webTestClient: WebTestClient
 
     @BeforeEach
@@ -104,21 +98,6 @@ class SimulateRouteShould(
                 .expectStatus().isOk
 
         assertThat(customFailure.actualParams).isEqualTo(expectedParams)
-    }
-
-    @Test
-    fun `trigger killapp failure`() {
-        webTestClient.post()
-                .uri("/simulate/killapp")
-                .exchange()
-                .expectStatus().isOk
-                .expectBody()
-                .consumeWith { exchangeResult ->
-                    assertThat(exchangeResult.status).isEqualTo(HttpStatus.OK)
-                }
-                .consumeWith(document("killapp"))
-
-        verify(systemExit, times(1)).exit(1)
     }
 }
 

@@ -1,13 +1,9 @@
-package uk.co.autotrader.application
+package uk.co.autotrader.application.simulations
 
 import org.springframework.stereotype.Component
 import java.security.MessageDigest
 import java.util.*
 import java.util.stream.IntStream
-
-interface Simulation {
-    suspend fun run()
-}
 
 @Component
 class Cpu : Simulation {

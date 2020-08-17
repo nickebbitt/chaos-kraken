@@ -206,15 +206,6 @@ class FileCreator : Failure {
     }
 }
 
-@Component("killapp")
-class KillApp(val systemExit: SystemExit) : Failure {
-
-    override fun fail(params: Map<String, String>) {
-        LOG.error("Application was killed by calling the 'killapp' failure")
-        systemExit.exit(1)
-    }
-}
-
 private const val CONNECTIONS = 5000
 
 @Component("selfconnectionsbomb")
