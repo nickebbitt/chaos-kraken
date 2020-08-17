@@ -17,6 +17,7 @@ java {
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -24,6 +25,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     implementation("org.apache.commons:commons-lang3:3.4")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     runtimeOnly("org.springframework.boot:spring-boot-devtools")

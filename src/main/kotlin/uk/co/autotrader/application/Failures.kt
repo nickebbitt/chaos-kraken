@@ -11,7 +11,6 @@ import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.nio.file.Path
 import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -34,10 +33,10 @@ class FailureSimulator(private val failures: Map<String, Failure>) {
         if (!type.isNullOrBlank()) {
             val failure: Failure? = failures[type]
             return if (failure == null) {
-                LOG.error("Unknown failure '{}'", type)
+                LOG.error("Unknown failure '${type}'")
                 false
             } else {
-                LOG.info("Triggering '{}'", type)
+                LOG.info("Triggering '${type}'")
                 failure.fail(params)
                 true
             }
