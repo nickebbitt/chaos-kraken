@@ -5,7 +5,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mockito
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationContext
@@ -34,7 +35,7 @@ class SimulationControllerShould(private val context: ApplicationContext) {
     }
 
     @Test
-    fun `trigger cpu failure`() {
+    fun `trigger cpu simulation`() {
         webTestClient.post()
                 .uri("/simulate/v2/cpu")
                 .exchange()
@@ -48,7 +49,7 @@ class SimulationControllerShould(private val context: ApplicationContext) {
     }
 
     @Test
-    fun `trigger killapp failure`() {
+    fun `trigger killapp simulation`() {
         webTestClient.post()
                 .uri("/simulate/v2/killapp")
                 .exchange()
@@ -59,7 +60,7 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                 }
                 .consumeWith(WebTestClientRestDocumentation.document("killapp"))
 
-        Mockito.verify(systemExit, Mockito.times(1)).exit(1)
+        verify(systemExit, times(1)).exit(1)
 
     }
 
@@ -84,5 +85,16 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                 .uri(URI("/actuator/health"))
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
+
+        webTestClient.post()
+                .uri("/simulate/v2/toggle-health")
+                .exchange()
+                .expectStatus().isOk
+
+        webTestClient.get()
+                .uri(URI("/actuator/health"))
+                .exchange()
+                .expectStatus().isOk
+
     }
 }
