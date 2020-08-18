@@ -75,18 +75,7 @@ class SimulateRouteShould(
                 .expectBody<String>().isEqualTo("Unrecognised failure. Failed at failing this service.")
     }
 
-    @Test
-    fun `toggle health to service unavailable`() {
-        webTestClient.post()
-                .uri("/simulate/toggle-service-health")
-                .exchange()
-                .expectStatus().isOk
 
-        webTestClient.get()
-                .uri(URI("http://localhost:${randomServerPort}/actuator/health"))
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
-    }
 
     @Test
     fun `delegate to specific failure type`() {

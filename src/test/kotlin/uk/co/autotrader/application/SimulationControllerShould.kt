@@ -9,12 +9,14 @@ import org.mockito.Mockito
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationContext
+import org.springframework.http.HttpStatus
 import org.springframework.restdocs.RestDocumentationContextProvider
 import org.springframework.restdocs.RestDocumentationExtension
 import org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.co.autotrader.application.simulations.SystemExit
+import java.net.URI
 
 @ExtendWith(SpringExtension::class, RestDocumentationExtension::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -59,5 +61,28 @@ class SimulationControllerShould(private val context: ApplicationContext) {
 
         Mockito.verify(systemExit, Mockito.times(1)).exit(1)
 
+    }
+
+    @Test
+    fun `toggle health to service unavailable`() {
+        webTestClient.get()
+                .uri(URI("/actuator/health"))
+                .exchange()
+                .expectStatus().isOk
+
+        webTestClient.post()
+                .uri("/simulate/v2/toggle-health")
+                .exchange()
+                .expectStatus().isOk
+                .expectBody()
+                .consumeWith { exchangeResult ->
+                    assertThat(exchangeResult.responseBody).isEqualTo("toggle-health simulation started".toByteArray())
+                }
+                .consumeWith(WebTestClientRestDocumentation.document("toggle-health"))
+
+        webTestClient.get()
+                .uri(URI("/actuator/health"))
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
     }
 }

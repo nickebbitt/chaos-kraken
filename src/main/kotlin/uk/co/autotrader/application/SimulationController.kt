@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.co.autotrader.application.simulations.Cpu
 import uk.co.autotrader.application.simulations.KillApp
+import uk.co.autotrader.application.simulations.ToggleHealth
 
 @RestController
 @RequestMapping("simulate/v2")
 class SimulationController(
         val cpu: Cpu,
-        val killApp: KillApp
+        val killApp: KillApp,
+        val toggleHealth: ToggleHealth
 ) {
 
     @PostMapping("/cpu")
@@ -30,6 +32,14 @@ class SimulationController(
             killApp.run()
         }
         return ResponseEntity.ok().body("killapp simulation started")
+    }
+
+    @PostMapping("/toggle-health")
+    fun toggleHealth(): ResponseEntity<String> {
+        GlobalScope.launch {
+            toggleHealth.run()
+        }
+        return ResponseEntity.ok().body("toggle-health simulation started")
     }
 
 }

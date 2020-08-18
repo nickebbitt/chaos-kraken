@@ -45,13 +45,6 @@ class FailureSimulator(private val failures: Map<String, Failure>) {
     }
 }
 
-@Component("toggle-service-health")
-class ToggleServiceHealth(private val healthCheck: HealthCheck) : Failure {
-    override fun fail(params: Map<String, String>) {
-        healthCheck.healthy = !healthCheck.healthy
-    }
-}
-
 @Component("unhealthy-service")
 class UnhealthyService(private val healthCheck: HealthCheck) : Failure {
     override fun fail(params: Map<String, String>) {
