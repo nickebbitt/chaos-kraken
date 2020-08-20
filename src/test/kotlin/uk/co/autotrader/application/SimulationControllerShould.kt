@@ -77,7 +77,7 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                 .expectStatus().isOk
                 .expectBody()
                 .consumeWith { exchangeResult ->
-                    assertThat(exchangeResult.responseBody).isEqualTo("toggle-health simulation started".toByteArray())
+                    assertThat(exchangeResult.responseBody).isEqualTo("health toggled".toByteArray())
                 }
                 .consumeWith(WebTestClientRestDocumentation.document("toggle-health"))
 
@@ -96,5 +96,18 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                 .exchange()
                 .expectStatus().isOk
 
+    }
+
+    @Test
+    fun `trigger memoryleak simulation`() {
+        webTestClient.post()
+                .uri("/simulate/v2/memoryleak")
+                .exchange()
+                .expectStatus().isOk
+                .expectBody()
+                .consumeWith { exchangeResult ->
+                    assertThat(exchangeResult.responseBody).isEqualTo("memoryleak simulation started".toByteArray())
+                }
+                .consumeWith(WebTestClientRestDocumentation.document("memoryleak"))
     }
 }

@@ -11,17 +11,13 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.restdocs.RestDocumentationContextProvider
 import org.springframework.restdocs.RestDocumentationExtension
 import org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint
-import org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.document
 import org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.documentationConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
-import java.net.URI
-import java.nio.charset.Charset
 
 @ExtendWith(SpringExtension::class, RestDocumentationExtension::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -34,23 +30,6 @@ class DefaultRouteShould(private val context: ApplicationContext) {
         this.webTestClient = webTestClient(context, restDocumentation)
     }
 
-    @Test
-    fun `return a welcome message`() {
-        webTestClient
-                .get()
-                .uri("/")
-                .exchange()
-                .expectStatus().isOk
-                .expectHeader().contentType(MediaType.TEXT_HTML)
-                .expectBody()
-                .consumeWith { exchangeResult ->
-                    val body = exchangeResult.responseBody!!.toString(Charset.forName("UTF-8"))
-                    assertThat(body).contains("This kraken is running and ready to cause some chaos.")
-                    assertThat(body).contains("Read the <a href=\"docs/index.html\">docs</a>.")
-                }
-                .consumeWith(document("welcome"))
-
-    }
 }
 
 @ExtendWith(SpringExtension::class, RestDocumentationExtension::class)

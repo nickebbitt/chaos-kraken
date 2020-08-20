@@ -26,6 +26,8 @@ interface Failure {
 
 private val LOG = LoggerFactory.getLogger(FailureSimulator::class.java)
 
+private const val ONE_KB = 1_024
+
 @Component
 class FailureSimulator(private val failures: Map<String, Failure>) {
 
@@ -42,21 +44,6 @@ class FailureSimulator(private val failures: Map<String, Failure>) {
             }
         }
         return false
-    }
-}
-
-@Component("memoryleak")
-class MemoryLeak : Failure {
-    override fun fail(params: Map<String, String>) {
-        val allocatedMemory = ArrayList<ByteArray>()
-
-        while (true) {
-            try {
-                allocatedMemory.add(ByteArray(ONE_KB))
-            } catch (outOfMemory: OutOfMemoryError) {
-                LOG.debug("Swallowing OOM")
-            }
-        }
     }
 }
 
@@ -176,8 +163,6 @@ class FileHandleBomb : Failure {
     }
 }
 
-private const val ONE_KB = 1_024
-
 @Component("filecreator")
 class FileCreator : Failure {
 
@@ -185,6 +170,7 @@ class FileCreator : Failure {
         while (true) {
             try {
                 val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".file-creator.run")
+                val ONE_KB = 0
                 writeRandomBytes(tempFile, ONE_KB)
             } catch (ignored: IOException) {
             }
