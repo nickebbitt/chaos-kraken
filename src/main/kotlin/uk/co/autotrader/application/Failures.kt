@@ -170,7 +170,6 @@ class FileCreator : Failure {
         while (true) {
             try {
                 val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".file-creator.run")
-                val ONE_KB = 0
                 writeRandomBytes(tempFile, ONE_KB)
             } catch (ignored: IOException) {
             }

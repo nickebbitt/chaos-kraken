@@ -1,5 +1,6 @@
 package uk.co.autotrader.application
 
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -16,6 +17,7 @@ import org.springframework.restdocs.RestDocumentationExtension
 import org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.co.autotrader.application.simulations.MemoryLeak
 import uk.co.autotrader.application.simulations.SystemExit
 import java.net.URI
 
@@ -27,6 +29,8 @@ class SimulationControllerShould(private val context: ApplicationContext) {
     private lateinit var webTestClient: WebTestClient
     @MockBean
     private lateinit var systemExit: SystemExit
+    @MockBean
+    private lateinit var memoryLeak: MemoryLeak
 
 
     @BeforeEach
@@ -100,14 +104,18 @@ class SimulationControllerShould(private val context: ApplicationContext) {
 
     @Test
     fun `trigger memoryleak simulation`() {
-        webTestClient.post()
-                .uri("/simulate/v2/memoryleak")
-                .exchange()
-                .expectStatus().isOk
-                .expectBody()
-                .consumeWith { exchangeResult ->
-                    assertThat(exchangeResult.responseBody).isEqualTo("memoryleak simulation started".toByteArray())
-                }
-                .consumeWith(WebTestClientRestDocumentation.document("memoryleak"))
+        runBlocking {
+            webTestClient.post()
+                    .uri("/simulate/v2/memoryleak")
+                    .exchange()
+                    .expectStatus().isOk
+                    .expectBody()
+                    .consumeWith { exchangeResult ->
+                        assertThat(exchangeResult.responseBody).isEqualTo("memoryleak simulation started".toByteArray())
+                    }
+                    .consumeWith(WebTestClientRestDocumentation.document("memoryleak"))
+
+            verify(memoryLeak, times(1)).run()
+        }
     }
 }
