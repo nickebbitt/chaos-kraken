@@ -10,16 +10,18 @@ import uk.co.autotrader.application.simulations.Cpu
 import uk.co.autotrader.application.simulations.KillApp
 import uk.co.autotrader.application.simulations.MemoryLeak
 import uk.co.autotrader.application.simulations.MemoryLeakOom
+import uk.co.autotrader.application.simulations.ThreadBomb
 import uk.co.autotrader.application.simulations.ToggleHealth
 
 @RestController
 @RequestMapping("simulate/v2")
 class SimulationController(
         val cpu: Cpu,
+        val killApp: KillApp,
+        val toggleHealth: ToggleHealth,
         val memoryLeak: MemoryLeak,
         val memoryLeakOom: MemoryLeakOom,
-        val killApp: KillApp,
-        val toggleHealth: ToggleHealth
+        val threadBomb: ThreadBomb
 ) {
 
     @PostMapping("/cpu")
@@ -28,22 +30,6 @@ class SimulationController(
             cpu.run()
         }
         return ResponseEntity.ok().body("cpu simulation started")
-    }
-
-    @PostMapping("/memoryleak")
-    fun memoryLeak(): ResponseEntity<String> {
-        GlobalScope.launch {
-            memoryLeak.run()
-        }
-        return ResponseEntity.ok().body("memoryleak simulation started")
-    }
-
-    @PostMapping("/memoryleak-oom")
-    fun memoryLeakOom(): ResponseEntity<String> {
-        GlobalScope.launch {
-            memoryLeakOom.run()
-        }
-        return ResponseEntity.ok().body("memoryleak-oom simulation started")
     }
 
     @PostMapping("/killapp")
@@ -62,5 +48,28 @@ class SimulationController(
         return ResponseEntity.ok().body("health toggled")
     }
 
+    @PostMapping("/memoryleak")
+    fun memoryLeak(): ResponseEntity<String> {
+        GlobalScope.launch {
+            memoryLeak.run()
+        }
+        return ResponseEntity.ok().body("memoryleak simulation started")
+    }
+
+    @PostMapping("/memoryleak-oom")
+    fun memoryLeakOom(): ResponseEntity<String> {
+        GlobalScope.launch {
+            memoryLeakOom.run()
+        }
+        return ResponseEntity.ok().body("memoryleak-oom simulation started")
+    }
+
+    @PostMapping("/threadbomb")
+    fun threadBomb(): ResponseEntity<String> {
+        GlobalScope.launch {
+            threadBomb.run()
+        }
+        return ResponseEntity.ok().body("threadbomb simulation started")
+    }
 
 }

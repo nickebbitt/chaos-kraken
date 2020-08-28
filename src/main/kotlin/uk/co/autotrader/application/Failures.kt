@@ -49,17 +49,6 @@ class FailureSimulator(private val failures: Map<String, Failure>) {
     }
 }
 
-@Component("threadbomb")
-class ThreadBomb : Failure {
-
-    override fun fail(params: Map<String, String>) {
-        while (true) {
-            val thread = Thread { while (true); }
-            thread.start()
-        }
-    }
-}
-
 object FileWriter {
 
     @Throws(IOException::class)

@@ -20,6 +20,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import uk.co.autotrader.application.simulations.MemoryLeak
 import uk.co.autotrader.application.simulations.MemoryLeakOom
 import uk.co.autotrader.application.simulations.SystemExit
+import uk.co.autotrader.application.simulations.ThreadBomb
 import java.net.URI
 
 @ExtendWith(SpringExtension::class, RestDocumentationExtension::class)
@@ -34,6 +35,8 @@ class SimulationControllerShould(private val context: ApplicationContext) {
     private lateinit var memoryLeak: MemoryLeak
     @MockBean
     private lateinit var memoryLeakOom: MemoryLeakOom
+    @MockBean
+    private lateinit var threadBomb: ThreadBomb
 
 
     @BeforeEach
@@ -136,6 +139,23 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                     .consumeWith(WebTestClientRestDocumentation.document("memoryleak-oom"))
 
             verify(memoryLeakOom, times(1)).run()
+        }
+    }
+
+    @Test
+    fun `trigger threadbomb simulation`() {
+        runBlocking {
+            webTestClient.post()
+                    .uri("/simulate/v2/threadbomb")
+                    .exchange()
+                    .expectStatus().isOk
+                    .expectBody()
+                    .consumeWith { exchangeResult ->
+                        assertThat(exchangeResult.responseBody).isEqualTo("threadbomb simulation started".toByteArray())
+                    }
+                    .consumeWith(WebTestClientRestDocumentation.document("threadbomb"))
+
+            verify(threadBomb, times(1)).run()
         }
     }
 }
