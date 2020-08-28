@@ -4,18 +4,20 @@ import org.apache.commons.lang3.RandomUtils
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import uk.co.autotrader.application.FileWriter.writeRandomBytes
-import java.io.*
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.FileReader
+import java.io.IOException
 import java.net.ServerSocket
 import java.net.Socket
 import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.nio.file.Path
-import java.security.MessageDigest
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.stream.Collectors
-import java.util.stream.IntStream
 import java.util.stream.Stream
 import kotlin.collections.ArrayList
 import kotlin.concurrent.timer
@@ -44,22 +46,6 @@ class FailureSimulator(private val failures: Map<String, Failure>) {
             }
         }
         return false
-    }
-}
-
-@Component("wastecpu")
-class WasteCpu : Failure {
-
-    override fun fail(params: Map<String, String>) {
-        IntStream.range(0, Runtime.getRuntime().availableProcessors())
-                .forEach { _ -> Thread(Runnable { this.hashRandomBytes() }).start() }
-    }
-
-    private fun hashRandomBytes() {
-        while (true) {
-            val digest = MessageDigest.getInstance("MD5")
-            digest.update(UUID.randomUUID().toString().toByteArray())
-        }
     }
 }
 
