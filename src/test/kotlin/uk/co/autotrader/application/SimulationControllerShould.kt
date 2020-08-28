@@ -18,6 +18,7 @@ import org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.co.autotrader.application.simulations.MemoryLeak
+import uk.co.autotrader.application.simulations.MemoryLeakOom
 import uk.co.autotrader.application.simulations.SystemExit
 import java.net.URI
 
@@ -31,6 +32,8 @@ class SimulationControllerShould(private val context: ApplicationContext) {
     private lateinit var systemExit: SystemExit
     @MockBean
     private lateinit var memoryLeak: MemoryLeak
+    @MockBean
+    private lateinit var memoryLeakOom: MemoryLeakOom
 
 
     @BeforeEach
@@ -116,6 +119,23 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                     .consumeWith(WebTestClientRestDocumentation.document("memoryleak"))
 
             verify(memoryLeak, times(1)).run()
+        }
+    }
+
+    @Test
+    fun `trigger memoryleak-oom simulation`() {
+        runBlocking {
+            webTestClient.post()
+                    .uri("/simulate/v2/memoryleak-oom")
+                    .exchange()
+                    .expectStatus().isOk
+                    .expectBody()
+                    .consumeWith { exchangeResult ->
+                        assertThat(exchangeResult.responseBody).isEqualTo("memoryleak-oom simulation started".toByteArray())
+                    }
+                    .consumeWith(WebTestClientRestDocumentation.document("memoryleak-oom"))
+
+            verify(memoryLeakOom, times(1)).run()
         }
     }
 }

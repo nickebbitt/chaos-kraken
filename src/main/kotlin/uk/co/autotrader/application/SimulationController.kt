@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 import uk.co.autotrader.application.simulations.Cpu
 import uk.co.autotrader.application.simulations.KillApp
 import uk.co.autotrader.application.simulations.MemoryLeak
+import uk.co.autotrader.application.simulations.MemoryLeakOom
 import uk.co.autotrader.application.simulations.ToggleHealth
 
 @RestController
@@ -16,6 +17,7 @@ import uk.co.autotrader.application.simulations.ToggleHealth
 class SimulationController(
         val cpu: Cpu,
         val memoryLeak: MemoryLeak,
+        val memoryLeakOom: MemoryLeakOom,
         val killApp: KillApp,
         val toggleHealth: ToggleHealth
 ) {
@@ -34,6 +36,14 @@ class SimulationController(
             memoryLeak.run()
         }
         return ResponseEntity.ok().body("memoryleak simulation started")
+    }
+
+    @PostMapping("/memoryleak-oom")
+    fun memoryLeakOom(): ResponseEntity<String> {
+        GlobalScope.launch {
+            memoryLeakOom.run()
+        }
+        return ResponseEntity.ok().body("memoryleak-oom simulation started")
     }
 
     @PostMapping("/killapp")

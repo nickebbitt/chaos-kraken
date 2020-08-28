@@ -10,7 +10,7 @@ class WelcomeController {
 
     @GetMapping
     fun welcome(): ResponseEntity<String> {
-        return ResponseEntity.ok().body(Companion.WELCOME_MESSAGE)
+        return ResponseEntity.ok().body(WELCOME_MESSAGE)
     }
 
     companion object {

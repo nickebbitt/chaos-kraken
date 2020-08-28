@@ -47,17 +47,6 @@ class FailureSimulator(private val failures: Map<String, Failure>) {
     }
 }
 
-@Component("memoryleak-oom")
-class MemoryLeakOom : Failure {
-    override fun fail(params: Map<String, String>) {
-        val allocatedMemory = ArrayList<ByteArray>()
-
-        while (true) {
-            allocatedMemory.add(ByteArray(ONE_KB))
-        }
-    }
-}
-
 @Component("wastecpu")
 class WasteCpu : Failure {
 

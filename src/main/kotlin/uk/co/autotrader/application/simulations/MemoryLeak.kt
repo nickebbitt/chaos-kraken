@@ -23,3 +23,14 @@ class MemoryLeak : Simulation {
         private val LOG = LoggerFactory.getLogger(MemoryLeak::class.java)
     }
 }
+
+@Component
+class MemoryLeakOom : Simulation {
+    override suspend fun run() {
+        val allocatedMemory = ArrayList<ByteArray>()
+
+        while (true) {
+            allocatedMemory.add(ByteArray(ONE_KILOBYTE))
+        }
+    }
+}
