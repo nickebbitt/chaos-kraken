@@ -13,13 +13,14 @@ import uk.co.autotrader.application.simulations.FileHandleBomb
 import uk.co.autotrader.application.simulations.Kill
 import uk.co.autotrader.application.simulations.MemoryLeak
 import uk.co.autotrader.application.simulations.MemoryLeakOom
+import uk.co.autotrader.application.simulations.SelfConnectionsBomb
 import uk.co.autotrader.application.simulations.StandardOutBomb
 import uk.co.autotrader.application.simulations.ThreadBomb
 import uk.co.autotrader.application.simulations.ToggleHealth
 
 @RestController
 @RequestMapping("simulate/v2")
-@SuppressWarnings("LongParameterList")
+@SuppressWarnings("LongParameterList", "TooManyFunctions")
 class SimulationController(
     private val cpu: Cpu,
     private val kill: Kill,
@@ -30,7 +31,8 @@ class SimulationController(
     private val diskBomb: DiskBomb,
     private val fileCreator: FileCreator,
     private val standardOutBomb: StandardOutBomb,
-    private val fileHandleBomb: FileHandleBomb
+    private val fileHandleBomb: FileHandleBomb,
+    private val selfConnectionsBomb: SelfConnectionsBomb
 ) {
 
     @PostMapping("/cpu")
@@ -111,5 +113,13 @@ class SimulationController(
             fileHandleBomb.run()
         }
         return ResponseEntity.ok().body("filehandlebomb simulation started")
+    }
+
+    @PostMapping("/selfconnectionsbomb")
+    fun selfConnectionsBomb(): ResponseEntity<String> {
+        GlobalScope.launch {
+            selfConnectionsBomb.run()
+        }
+        return ResponseEntity.ok().body("selfconnectionsbomb simulation started")
     }
 }

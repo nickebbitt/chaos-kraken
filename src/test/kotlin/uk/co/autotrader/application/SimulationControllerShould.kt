@@ -22,6 +22,7 @@ import uk.co.autotrader.application.simulations.FileCreator
 import uk.co.autotrader.application.simulations.FileHandleBomb
 import uk.co.autotrader.application.simulations.MemoryLeak
 import uk.co.autotrader.application.simulations.MemoryLeakOom
+import uk.co.autotrader.application.simulations.SelfConnectionsBomb
 import uk.co.autotrader.application.simulations.StandardOutBomb
 import uk.co.autotrader.application.simulations.SystemExit
 import uk.co.autotrader.application.simulations.ThreadBomb
@@ -57,6 +58,9 @@ class SimulationControllerShould(private val context: ApplicationContext) {
 
     @MockBean
     private lateinit var fileHandleBomb: FileHandleBomb
+
+    @MockBean
+    private lateinit var selfConnectionsBomb: SelfConnectionsBomb
 
     @BeforeEach
     fun setup(restDocumentation: RestDocumentationContextProvider) {
@@ -242,6 +246,23 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                     .consumeWith(WebTestClientRestDocumentation.document("filehandlebomb"))
 
             verify(fileHandleBomb, times(1)).run()
+        }
+    }
+
+    @Test
+    fun `trigger selfconnectionsbomb simulation`() {
+        runBlocking {
+            webTestClient.post()
+                    .uri("/simulate/v2/selfconnectionsbomb")
+                    .exchange()
+                    .expectStatus().isOk
+                    .expectBody()
+                    .consumeWith { exchangeResult ->
+                        assertThat(exchangeResult.responseBody).isEqualTo("selfconnectionsbomb simulation started".toByteArray())
+                    }
+                    .consumeWith(WebTestClientRestDocumentation.document("selfconnectionsbomb"))
+
+            verify(selfConnectionsBomb, times(1)).run()
         }
     }
 }
