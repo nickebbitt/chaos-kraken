@@ -13,11 +13,10 @@ import java.util.*
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
-
-@Component("diskbomb")
+@Component
 class DiskBomb : Simulation {
 
-    override suspend fun run() {
+    override suspend fun run(params: Map<String, String>) {
         val directoryPaths = listAllDirectories()
 
         while (true) {
@@ -48,10 +47,10 @@ class DiskBomb : Simulation {
     }
 }
 
-@Component("filecreator")
+@Component
 class FileCreator : Simulation {
 
-    override suspend fun run() {
+    override suspend fun run(params: Map<String, String>) {
         while (true) {
             try {
                 val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".file-creator.run")

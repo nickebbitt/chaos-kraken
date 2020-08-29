@@ -8,7 +8,7 @@ import java.util.stream.IntStream
 @Component
 class Cpu : Simulation {
 
-    override suspend fun run() {
+    override suspend fun run(params: Map<String, String>) {
         IntStream.range(0, Runtime.getRuntime().availableProcessors())
                 .forEach { _ -> Thread(Runnable { this.hashRandomBytes() }).start() }
     }

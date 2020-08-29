@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class MemoryLeak : Simulation {
-    override suspend fun run() {
+    override suspend fun run(params: Map<String, String>) {
         val allocatedMemory = ArrayList<ByteArray>()
 
         while (true) {
@@ -24,7 +24,7 @@ class MemoryLeak : Simulation {
 
 @Component
 class MemoryLeakOom : Simulation {
-    override suspend fun run() {
+    override suspend fun run(params: Map<String, String>) {
         val allocatedMemory = ArrayList<ByteArray>()
 
         while (true) {

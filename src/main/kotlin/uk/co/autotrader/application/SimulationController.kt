@@ -12,6 +12,7 @@ import uk.co.autotrader.application.simulations.FileCreator
 import uk.co.autotrader.application.simulations.Kill
 import uk.co.autotrader.application.simulations.MemoryLeak
 import uk.co.autotrader.application.simulations.MemoryLeakOom
+import uk.co.autotrader.application.simulations.StandardOutBomb
 import uk.co.autotrader.application.simulations.ThreadBomb
 import uk.co.autotrader.application.simulations.ToggleHealth
 
@@ -19,14 +20,15 @@ import uk.co.autotrader.application.simulations.ToggleHealth
 @RequestMapping("simulate/v2")
 @SuppressWarnings("LongParameterList")
 class SimulationController(
-    val cpu: Cpu,
-    val kill: Kill,
-    val toggleHealth: ToggleHealth,
-    val memoryLeak: MemoryLeak,
-    val memoryLeakOom: MemoryLeakOom,
-    val threadBomb: ThreadBomb,
-    val diskBomb: DiskBomb,
-    val fileCreator: FileCreator
+    private val cpu: Cpu,
+    private val kill: Kill,
+    private val toggleHealth: ToggleHealth,
+    private val memoryLeak: MemoryLeak,
+    private val memoryLeakOom: MemoryLeakOom,
+    private val threadBomb: ThreadBomb,
+    private val diskBomb: DiskBomb,
+    private val fileCreator: FileCreator,
+    private val standardOutBomb: StandardOutBomb
 ) {
 
     @PostMapping("/cpu")
@@ -93,4 +95,11 @@ class SimulationController(
         return ResponseEntity.ok().body("filecreator simulation started")
     }
 
+    @PostMapping("/stdoutbomb")
+    fun standardOutBomb(): ResponseEntity<String> {
+        GlobalScope.launch {
+            standardOutBomb.run()
+        }
+        return ResponseEntity.ok().body("stdoutbomb simulation started")
+    }
 }

@@ -21,6 +21,7 @@ import uk.co.autotrader.application.simulations.DiskBomb
 import uk.co.autotrader.application.simulations.FileCreator
 import uk.co.autotrader.application.simulations.MemoryLeak
 import uk.co.autotrader.application.simulations.MemoryLeakOom
+import uk.co.autotrader.application.simulations.StandardOutBomb
 import uk.co.autotrader.application.simulations.SystemExit
 import uk.co.autotrader.application.simulations.ThreadBomb
 import java.net.URI
@@ -34,17 +35,24 @@ class SimulationControllerShould(private val context: ApplicationContext) {
 
     @MockBean
     private lateinit var systemExit: SystemExit
+
     @MockBean
     private lateinit var memoryLeak: MemoryLeak
+
     @MockBean
     private lateinit var memoryLeakOom: MemoryLeakOom
+
     @MockBean
     private lateinit var threadBomb: ThreadBomb
+
     @MockBean
     private lateinit var diskBomb: DiskBomb
+
     @MockBean
     private lateinit var fileCreator: FileCreator
 
+    @MockBean
+    private lateinit var standardOutBomb: StandardOutBomb
 
     @BeforeEach
     fun setup(restDocumentation: RestDocumentationContextProvider) {
@@ -62,7 +70,6 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                     assertThat(exchangeResult.responseBody).isEqualTo("cpu simulation started".toByteArray())
                 }
                 .consumeWith(WebTestClientRestDocumentation.document("cpu"))
-
     }
 
     @Test
@@ -197,6 +204,23 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                     .consumeWith(WebTestClientRestDocumentation.document("filecreator"))
 
             verify(fileCreator, times(1)).run()
+        }
+    }
+
+    @Test
+    fun `trigger stdoutbomb simulation`() {
+        runBlocking {
+            webTestClient.post()
+                    .uri("/simulate/v2/stdoutbomb")
+                    .exchange()
+                    .expectStatus().isOk
+                    .expectBody()
+                    .consumeWith { exchangeResult ->
+                        assertThat(exchangeResult.responseBody).isEqualTo("stdoutbomb simulation started".toByteArray())
+                    }
+                    .consumeWith(WebTestClientRestDocumentation.document("stdoutbomb"))
+
+            verify(standardOutBomb, times(1)).run()
         }
     }
 }

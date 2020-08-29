@@ -7,7 +7,7 @@ import kotlin.system.exitProcess
 @Component
 class Kill(val systemExit: SystemExit) : Simulation {
 
-    override suspend fun run() {
+    override suspend fun run(params: Map<String, String>) {
         LOG.error("Application was killed by calling the 'killapp' failure")
         systemExit.exit(1)
     }

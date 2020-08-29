@@ -9,11 +9,8 @@ import java.io.IOException
 import java.net.ServerSocket
 import java.net.Socket
 import java.nio.ByteBuffer
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.concurrent.timer
 
 interface Failure {
     fun fail(params: Map<String, String> = emptyMap())
@@ -28,27 +25,15 @@ class FailureSimulator(private val failures: Map<String, Failure>) {
         if (!type.isNullOrBlank()) {
             val failure: Failure? = failures[type]
             return if (failure == null) {
-                LOG.error("Unknown failure '${type}'")
+                LOG.error("Unknown failure '$type'")
                 false
             } else {
-                LOG.info("Triggering '${type}'")
+                LOG.info("Triggering '$type'")
                 failure.fail(params)
                 true
             }
         }
         return false
-    }
-}
-
-@Component("stdoutbomb")
-class StandardOutBomb : Failure {
-    override fun fail(params: Map<String, String>) {
-        timer(
-                period = params["periodMillis"]?.toLongOrNull() ?: 1L,
-                action = {
-                    println("Standard Out Bomb: " + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                }
-        )
     }
 }
 
