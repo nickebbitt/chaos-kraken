@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 import uk.co.autotrader.application.simulations.Cpu
 import uk.co.autotrader.application.simulations.DiskBomb
 import uk.co.autotrader.application.simulations.FileCreator
+import uk.co.autotrader.application.simulations.FileHandleBomb
 import uk.co.autotrader.application.simulations.Kill
 import uk.co.autotrader.application.simulations.MemoryLeak
 import uk.co.autotrader.application.simulations.MemoryLeakOom
@@ -28,7 +29,8 @@ class SimulationController(
     private val threadBomb: ThreadBomb,
     private val diskBomb: DiskBomb,
     private val fileCreator: FileCreator,
-    private val standardOutBomb: StandardOutBomb
+    private val standardOutBomb: StandardOutBomb,
+    private val fileHandleBomb: FileHandleBomb
 ) {
 
     @PostMapping("/cpu")
@@ -101,5 +103,13 @@ class SimulationController(
             standardOutBomb.run()
         }
         return ResponseEntity.ok().body("stdoutbomb simulation started")
+    }
+
+    @PostMapping("/filehandlebomb")
+    fun fileHandleBomb(): ResponseEntity<String> {
+        GlobalScope.launch {
+            fileHandleBomb.run()
+        }
+        return ResponseEntity.ok().body("filehandlebomb simulation started")
     }
 }

@@ -19,6 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.co.autotrader.application.simulations.DiskBomb
 import uk.co.autotrader.application.simulations.FileCreator
+import uk.co.autotrader.application.simulations.FileHandleBomb
 import uk.co.autotrader.application.simulations.MemoryLeak
 import uk.co.autotrader.application.simulations.MemoryLeakOom
 import uk.co.autotrader.application.simulations.StandardOutBomb
@@ -53,6 +54,9 @@ class SimulationControllerShould(private val context: ApplicationContext) {
 
     @MockBean
     private lateinit var standardOutBomb: StandardOutBomb
+
+    @MockBean
+    private lateinit var fileHandleBomb: FileHandleBomb
 
     @BeforeEach
     fun setup(restDocumentation: RestDocumentationContextProvider) {
@@ -221,6 +225,23 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                     .consumeWith(WebTestClientRestDocumentation.document("stdoutbomb"))
 
             verify(standardOutBomb, times(1)).run()
+        }
+    }
+
+    @Test
+    fun `trigger filehandlebomb simulation`() {
+        runBlocking {
+            webTestClient.post()
+                    .uri("/simulate/v2/filehandlebomb")
+                    .exchange()
+                    .expectStatus().isOk
+                    .expectBody()
+                    .consumeWith { exchangeResult ->
+                        assertThat(exchangeResult.responseBody).isEqualTo("filehandlebomb simulation started".toByteArray())
+                    }
+                    .consumeWith(WebTestClientRestDocumentation.document("filehandlebomb"))
+
+            verify(fileHandleBomb, times(1)).run()
         }
     }
 }

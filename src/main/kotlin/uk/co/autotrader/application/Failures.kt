@@ -3,14 +3,10 @@ package uk.co.autotrader.application
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import uk.co.autotrader.application.simulations.ONE_KILOBYTE
-import java.io.File
-import java.io.FileReader
 import java.io.IOException
 import java.net.ServerSocket
 import java.net.Socket
 import java.nio.ByteBuffer
-import java.util.*
-import kotlin.collections.ArrayList
 
 interface Failure {
     fun fail(params: Map<String, String> = emptyMap())
@@ -34,22 +30,6 @@ class FailureSimulator(private val failures: Map<String, Failure>) {
             }
         }
         return false
-    }
-}
-
-@Component("filehandlebomb")
-class FileHandleBomb : Failure {
-    override fun fail(params: Map<String, String>) {
-        val readers = ArrayList<FileReader>()
-
-        while (true) {
-            try {
-                val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".handle.run")
-                val fileReader = FileReader(tempFile)
-                readers.add(fileReader)
-            } catch (ignored: IOException) {
-            }
-        }
     }
 }
 
