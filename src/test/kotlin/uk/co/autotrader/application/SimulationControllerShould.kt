@@ -76,14 +76,14 @@ class SimulationControllerShould(private val context: ApplicationContext) {
     @Test
     fun `trigger cpu simulation`() {
         webTestClient.post()
-                .uri("/simulate/v2/cpu")
+                .uri("/simulate/v2/wastecpu")
                 .exchange()
                 .expectStatus().isOk
                 .expectBody()
                 .consumeWith { exchangeResult ->
-                    assertThat(exchangeResult.responseBody).isEqualTo("cpu simulation started".toByteArray())
+                    assertThat(exchangeResult.responseBody).isEqualTo("wastecpu simulation started".toByteArray())
                 }
-                .consumeWith(WebTestClientRestDocumentation.document("cpu"))
+                .consumeWith(WebTestClientRestDocumentation.document("wastecpu"))
     }
 
     @Test

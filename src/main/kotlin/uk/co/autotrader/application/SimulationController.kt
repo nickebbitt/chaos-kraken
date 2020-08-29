@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import uk.co.autotrader.application.simulations.Cpu
 import uk.co.autotrader.application.simulations.DirectMemoryLeak
 import uk.co.autotrader.application.simulations.DirectMemoryLeakOptions
 import uk.co.autotrader.application.simulations.DiskBomb
@@ -21,31 +20,32 @@ import uk.co.autotrader.application.simulations.StandardOutBomb
 import uk.co.autotrader.application.simulations.StandardOutBombOptions
 import uk.co.autotrader.application.simulations.ThreadBomb
 import uk.co.autotrader.application.simulations.ToggleHealth
+import uk.co.autotrader.application.simulations.WasteCpu
 
 @RestController
 @RequestMapping("simulate/v2")
 @SuppressWarnings("LongParameterList", "TooManyFunctions")
 class SimulationController(
-    private val cpu: Cpu,
-    private val kill: Kill,
-    private val toggleHealth: ToggleHealth,
-    private val memoryLeak: MemoryLeak,
-    private val memoryLeakOom: MemoryLeakOom,
-    private val threadBomb: ThreadBomb,
-    private val diskBomb: DiskBomb,
-    private val fileCreator: FileCreator,
-    private val standardOutBomb: StandardOutBomb,
-    private val fileHandleBomb: FileHandleBomb,
-    private val selfConnectionsBomb: SelfConnectionsBomb,
-    private val directMemoryLeak: DirectMemoryLeak
+        private val wasteCpu: WasteCpu,
+        private val kill: Kill,
+        private val toggleHealth: ToggleHealth,
+        private val memoryLeak: MemoryLeak,
+        private val memoryLeakOom: MemoryLeakOom,
+        private val threadBomb: ThreadBomb,
+        private val diskBomb: DiskBomb,
+        private val fileCreator: FileCreator,
+        private val standardOutBomb: StandardOutBomb,
+        private val fileHandleBomb: FileHandleBomb,
+        private val selfConnectionsBomb: SelfConnectionsBomb,
+        private val directMemoryLeak: DirectMemoryLeak
 ) {
 
-    @PostMapping("/cpu")
-    fun cpu(): ResponseEntity<String> {
+    @PostMapping("/wastecpu")
+    fun wasteCpu(): ResponseEntity<String> {
         GlobalScope.launch {
-            cpu.run()
+            wasteCpu.run()
         }
-        return ResponseEntity.ok().body("cpu simulation started")
+        return ResponseEntity.ok().body("wastecpu simulation started")
     }
 
     @PostMapping("/killapp")

@@ -6,11 +6,11 @@ import java.util.*
 import java.util.stream.IntStream
 
 @Component
-class Cpu : Simulation {
+class WasteCpu : Simulation {
 
     override suspend fun run(options: SimulationOptions?) {
         IntStream.range(0, Runtime.getRuntime().availableProcessors())
-                .forEach { _ -> Thread(Runnable { this.hashRandomBytes() }).start() }
+                .forEach { _ -> Thread { this.hashRandomBytes() }.start() }
     }
 
     private fun hashRandomBytes() {
