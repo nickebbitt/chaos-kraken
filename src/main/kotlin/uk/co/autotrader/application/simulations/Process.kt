@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 import kotlin.system.exitProcess
 
 @Component
-class KillApp(val systemExit: SystemExit) : Simulation {
+class Kill(val systemExit: SystemExit) : Simulation {
 
     override suspend fun run() {
         LOG.error("Application was killed by calling the 'killapp' failure")
@@ -13,7 +13,7 @@ class KillApp(val systemExit: SystemExit) : Simulation {
     }
 
     companion object {
-        private val LOG = LoggerFactory.getLogger(KillApp::class.java)
+        private val LOG = LoggerFactory.getLogger(Kill::class.java)
     }
 }
 

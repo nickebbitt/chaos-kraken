@@ -1,24 +1,17 @@
 package uk.co.autotrader.application
 
-import org.apache.commons.lang3.RandomUtils
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import uk.co.autotrader.application.FileWriter.writeRandomBytes
-import java.io.BufferedOutputStream
+import uk.co.autotrader.application.simulations.ONE_KILOBYTE
 import java.io.File
-import java.io.FileOutputStream
 import java.io.FileReader
 import java.io.IOException
 import java.net.ServerSocket
 import java.net.Socket
 import java.nio.ByteBuffer
-import java.nio.file.Files
-import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import java.util.stream.Collectors
-import java.util.stream.Stream
 import kotlin.collections.ArrayList
 import kotlin.concurrent.timer
 
@@ -27,8 +20,6 @@ interface Failure {
 }
 
 private val LOG = LoggerFactory.getLogger(FailureSimulator::class.java)
-
-private const val ONE_KB = 1_024
 
 @Component
 class FailureSimulator(private val failures: Map<String, Failure>) {
@@ -46,56 +37,6 @@ class FailureSimulator(private val failures: Map<String, Failure>) {
             }
         }
         return false
-    }
-}
-
-object FileWriter {
-
-    @Throws(IOException::class)
-    fun writeRandomBytes(file: File, size: Int) {
-        BufferedOutputStream(FileOutputStream(file)).use { output ->
-            var i = 0
-            while (i < size) {
-                output.write(RandomUtils.nextBytes(1))
-                i += 1
-            }
-        }
-    }
-}
-
-private const val ONE_GB = 1024 * 1024 * 1024
-
-@Component("diskbomb")
-class DiskBomb : Failure {
-
-    override fun fail(params: Map<String, String>) {
-        val directoryPaths = listAllDirectories()
-
-        while (true) {
-            try {
-                val randomFile = findRandomElement(directoryPaths)
-                        .resolve(UUID.randomUUID().toString() + ".disk-bomb.run")
-                        .toFile()
-                writeRandomBytes(randomFile, ONE_GB)
-            } catch (ignored: IOException) {
-            }
-        }
-    }
-
-    private fun <R> findRandomElement(list: List<R>): R {
-        return list[Random().nextInt(list.size)]
-    }
-
-    private fun listAllDirectories(): List<Path> {
-        return Arrays.stream(File.listRoots())
-                .map { it.toPath() }
-                .flatMap { this.listAllSubDirectories(it) }
-                .collect(Collectors.toList())
-    }
-
-    private fun listAllSubDirectories(root: Path): Stream<Path> {
-        return Files.walk(root)
-                .filter { path -> path.toFile().isDirectory }
     }
 }
 
@@ -121,20 +62,6 @@ class FileHandleBomb : Failure {
                 val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".handle.run")
                 val fileReader = FileReader(tempFile)
                 readers.add(fileReader)
-            } catch (ignored: IOException) {
-            }
-        }
-    }
-}
-
-@Component("filecreator")
-class FileCreator : Failure {
-
-    override fun fail(params: Map<String, String>) {
-        while (true) {
-            try {
-                val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".file-creator.run")
-                writeRandomBytes(tempFile, ONE_KB)
             } catch (ignored: IOException) {
             }
         }
@@ -188,7 +115,7 @@ class DirectMemoryLeak : Failure {
                 } ?: { true }
 
         while (check.invoke()) {
-            allocatedMemory.add(ByteBuffer.allocateDirect(ONE_KB * ONE_KB))
+            allocatedMemory.add(ByteBuffer.allocateDirect(ONE_KILOBYTE * ONE_KILOBYTE))
         }
     }
 }

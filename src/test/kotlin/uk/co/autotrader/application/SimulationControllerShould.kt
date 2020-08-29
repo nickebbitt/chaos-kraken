@@ -17,6 +17,8 @@ import org.springframework.restdocs.RestDocumentationExtension
 import org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.co.autotrader.application.simulations.DiskBomb
+import uk.co.autotrader.application.simulations.FileCreator
 import uk.co.autotrader.application.simulations.MemoryLeak
 import uk.co.autotrader.application.simulations.MemoryLeakOom
 import uk.co.autotrader.application.simulations.SystemExit
@@ -29,6 +31,7 @@ import java.net.URI
 class SimulationControllerShould(private val context: ApplicationContext) {
 
     private lateinit var webTestClient: WebTestClient
+
     @MockBean
     private lateinit var systemExit: SystemExit
     @MockBean
@@ -37,6 +40,10 @@ class SimulationControllerShould(private val context: ApplicationContext) {
     private lateinit var memoryLeakOom: MemoryLeakOom
     @MockBean
     private lateinit var threadBomb: ThreadBomb
+    @MockBean
+    private lateinit var diskBomb: DiskBomb
+    @MockBean
+    private lateinit var fileCreator: FileCreator
 
 
     @BeforeEach
@@ -156,6 +163,40 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                     .consumeWith(WebTestClientRestDocumentation.document("threadbomb"))
 
             verify(threadBomb, times(1)).run()
+        }
+    }
+
+    @Test
+    fun `trigger diskbomb simulation`() {
+        runBlocking {
+            webTestClient.post()
+                    .uri("/simulate/v2/diskbomb")
+                    .exchange()
+                    .expectStatus().isOk
+                    .expectBody()
+                    .consumeWith { exchangeResult ->
+                        assertThat(exchangeResult.responseBody).isEqualTo("diskbomb simulation started".toByteArray())
+                    }
+                    .consumeWith(WebTestClientRestDocumentation.document("diskbomb"))
+
+            verify(diskBomb, times(1)).run()
+        }
+    }
+
+    @Test
+    fun `trigger filecreator simulation`() {
+        runBlocking {
+            webTestClient.post()
+                    .uri("/simulate/v2/filecreator")
+                    .exchange()
+                    .expectStatus().isOk
+                    .expectBody()
+                    .consumeWith { exchangeResult ->
+                        assertThat(exchangeResult.responseBody).isEqualTo("filecreator simulation started".toByteArray())
+                    }
+                    .consumeWith(WebTestClientRestDocumentation.document("filecreator"))
+
+            verify(fileCreator, times(1)).run()
         }
     }
 }

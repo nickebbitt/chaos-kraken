@@ -3,8 +3,6 @@ package uk.co.autotrader.application.simulations
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
-private const val ONE_KILOBYTE = 1_024
-
 @Component
 class MemoryLeak : Simulation {
     override suspend fun run() {

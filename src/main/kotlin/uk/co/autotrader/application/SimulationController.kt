@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.co.autotrader.application.simulations.Cpu
-import uk.co.autotrader.application.simulations.KillApp
+import uk.co.autotrader.application.simulations.DiskBomb
+import uk.co.autotrader.application.simulations.FileCreator
+import uk.co.autotrader.application.simulations.Kill
 import uk.co.autotrader.application.simulations.MemoryLeak
 import uk.co.autotrader.application.simulations.MemoryLeakOom
 import uk.co.autotrader.application.simulations.ThreadBomb
@@ -15,13 +17,16 @@ import uk.co.autotrader.application.simulations.ToggleHealth
 
 @RestController
 @RequestMapping("simulate/v2")
+@SuppressWarnings("LongParameterList")
 class SimulationController(
-        val cpu: Cpu,
-        val killApp: KillApp,
-        val toggleHealth: ToggleHealth,
-        val memoryLeak: MemoryLeak,
-        val memoryLeakOom: MemoryLeakOom,
-        val threadBomb: ThreadBomb
+    val cpu: Cpu,
+    val kill: Kill,
+    val toggleHealth: ToggleHealth,
+    val memoryLeak: MemoryLeak,
+    val memoryLeakOom: MemoryLeakOom,
+    val threadBomb: ThreadBomb,
+    val diskBomb: DiskBomb,
+    val fileCreator: FileCreator
 ) {
 
     @PostMapping("/cpu")
@@ -35,7 +40,7 @@ class SimulationController(
     @PostMapping("/killapp")
     fun killApp(): ResponseEntity<String> {
         GlobalScope.launch {
-            killApp.run()
+            kill.run()
         }
         return ResponseEntity.ok().body("killapp simulation started")
     }
@@ -70,6 +75,22 @@ class SimulationController(
             threadBomb.run()
         }
         return ResponseEntity.ok().body("threadbomb simulation started")
+    }
+
+    @PostMapping("/diskbomb")
+    fun diskBomb(): ResponseEntity<String> {
+        GlobalScope.launch {
+            diskBomb.run()
+        }
+        return ResponseEntity.ok().body("diskbomb simulation started")
+    }
+
+    @PostMapping("/filecreator")
+    fun fileCreator(): ResponseEntity<String> {
+        GlobalScope.launch {
+            fileCreator.run()
+        }
+        return ResponseEntity.ok().body("filecreator simulation started")
     }
 
 }
