@@ -9,46 +9,13 @@ import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.router
 import reactor.core.publisher.Mono
-import uk.co.autotrader.application.simulations.Cpu
 
 @Configuration
-class Routes(
-        private val echoStatusHandler: EchoStatusHandler,
-        private val failureHandler: FailureHandler,
-        private val cpu: Cpu
-) {
-
-    @Bean
-    fun simulate() = router {
-        POST("/simulate/{failureType}") { request -> failureHandler.processFailure(request) }
-    }
+class Routes(private val echoStatusHandler: EchoStatusHandler) {
 
     @Bean
     fun echoStatus() = router {
         GET("/echostatus/{status}") { request -> echoStatusHandler.responseStatus(request) }
-    }
-
-}
-
-val WELCOME_MESSAGE = """
-        This kraken is running and ready to cause some chaos.
-        <p>
-        Read the <a href="docs/index.html">docs</a>.
-    """.trimIndent()
-
-@Component
-class FailureHandler(private val failureSimulator: FailureSimulator) {
-
-    fun processFailure(request: ServerRequest): Mono<ServerResponse> {
-
-        return if (failureSimulator.run(
-                        request.pathVariable("failureType"),
-                        request.queryParams().toSingleValueMap())
-        ) {
-            ServerResponse.ok().build()
-        } else {
-            ServerResponse.badRequest().bodyValue("Unrecognised failure. Failed at failing this service.")
-        }
     }
 }
 

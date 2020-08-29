@@ -17,6 +17,8 @@ import org.springframework.restdocs.RestDocumentationExtension
 import org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.co.autotrader.application.simulations.DirectMemoryLeak
+import uk.co.autotrader.application.simulations.DirectMemoryLeakOptions
 import uk.co.autotrader.application.simulations.DiskBomb
 import uk.co.autotrader.application.simulations.FileCreator
 import uk.co.autotrader.application.simulations.FileHandleBomb
@@ -24,6 +26,7 @@ import uk.co.autotrader.application.simulations.MemoryLeak
 import uk.co.autotrader.application.simulations.MemoryLeakOom
 import uk.co.autotrader.application.simulations.SelfConnectionsBomb
 import uk.co.autotrader.application.simulations.StandardOutBomb
+import uk.co.autotrader.application.simulations.StandardOutBombOptions
 import uk.co.autotrader.application.simulations.SystemExit
 import uk.co.autotrader.application.simulations.ThreadBomb
 import java.net.URI
@@ -62,6 +65,9 @@ class SimulationControllerShould(private val context: ApplicationContext) {
     @MockBean
     private lateinit var selfConnectionsBomb: SelfConnectionsBomb
 
+    @MockBean
+    private lateinit var directMemoryLeak: DirectMemoryLeak
+
     @BeforeEach
     fun setup(restDocumentation: RestDocumentationContextProvider) {
         this.webTestClient = webTestClient(context, restDocumentation)
@@ -93,7 +99,6 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                 .consumeWith(WebTestClientRestDocumentation.document("killapp"))
 
         verify(systemExit, times(1)).exit(1)
-
     }
 
     @Test
@@ -127,7 +132,6 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                 .uri(URI("/actuator/health"))
                 .exchange()
                 .expectStatus().isOk
-
     }
 
     @Test
@@ -156,7 +160,8 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                     .expectStatus().isOk
                     .expectBody()
                     .consumeWith { exchangeResult ->
-                        assertThat(exchangeResult.responseBody).isEqualTo("memoryleak-oom simulation started".toByteArray())
+                        assertThat(exchangeResult.responseBody)
+                                .isEqualTo("memoryleak-oom simulation started".toByteArray())
                     }
                     .consumeWith(WebTestClientRestDocumentation.document("memoryleak-oom"))
 
@@ -207,7 +212,8 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                     .expectStatus().isOk
                     .expectBody()
                     .consumeWith { exchangeResult ->
-                        assertThat(exchangeResult.responseBody).isEqualTo("filecreator simulation started".toByteArray())
+                        assertThat(exchangeResult.responseBody)
+                                .isEqualTo("filecreator simulation started".toByteArray())
                     }
                     .consumeWith(WebTestClientRestDocumentation.document("filecreator"))
 
@@ -219,7 +225,12 @@ class SimulationControllerShould(private val context: ApplicationContext) {
     fun `trigger stdoutbomb simulation`() {
         runBlocking {
             webTestClient.post()
-                    .uri("/simulate/v2/stdoutbomb")
+                    .uri { uriBuilder ->
+                        uriBuilder
+                                .path("/simulate/v2/stdoutbomb")
+                                .queryParam("periodMillis", "5")
+                                .build()
+                    }
                     .exchange()
                     .expectStatus().isOk
                     .expectBody()
@@ -228,7 +239,7 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                     }
                     .consumeWith(WebTestClientRestDocumentation.document("stdoutbomb"))
 
-            verify(standardOutBomb, times(1)).run()
+            verify(standardOutBomb, times(1)).run(StandardOutBombOptions(5))
         }
     }
 
@@ -241,7 +252,8 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                     .expectStatus().isOk
                     .expectBody()
                     .consumeWith { exchangeResult ->
-                        assertThat(exchangeResult.responseBody).isEqualTo("filehandlebomb simulation started".toByteArray())
+                        assertThat(exchangeResult.responseBody)
+                                .isEqualTo("filehandlebomb simulation started".toByteArray())
                     }
                     .consumeWith(WebTestClientRestDocumentation.document("filehandlebomb"))
 
@@ -258,11 +270,35 @@ class SimulationControllerShould(private val context: ApplicationContext) {
                     .expectStatus().isOk
                     .expectBody()
                     .consumeWith { exchangeResult ->
-                        assertThat(exchangeResult.responseBody).isEqualTo("selfconnectionsbomb simulation started".toByteArray())
+                        assertThat(exchangeResult.responseBody)
+                                .isEqualTo("selfconnectionsbomb simulation started".toByteArray())
                     }
                     .consumeWith(WebTestClientRestDocumentation.document("selfconnectionsbomb"))
 
             verify(selfConnectionsBomb, times(1)).run()
+        }
+    }
+
+    @Test
+    fun `trigger directmemoryleak simulation`() {
+        runBlocking {
+            webTestClient.post()
+                    .uri { uriBuilder ->
+                        uriBuilder
+                                .path("/simulate/v2/directmemoryleak")
+                                .queryParam("limitMB", "200")
+                                .build()
+                    }
+                    .exchange()
+                    .expectStatus().isOk
+                    .expectBody()
+                    .consumeWith { exchangeResult ->
+                        assertThat(exchangeResult.responseBody)
+                                .isEqualTo("directmemoryleak simulation started".toByteArray())
+                    }
+                    .consumeWith(WebTestClientRestDocumentation.document("directmemoryleak"))
+
+            verify(directMemoryLeak, times(1)).run(DirectMemoryLeakOptions(limitMB = 200))
         }
     }
 }

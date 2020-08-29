@@ -16,7 +16,7 @@ import java.util.stream.Stream
 @Component
 class DiskBomb : Simulation {
 
-    override suspend fun run(params: Map<String, String>) {
+    override suspend fun run(options: SimulationOptions?) {
         val directoryPaths = listAllDirectories()
 
         while (true) {
@@ -50,7 +50,7 @@ class DiskBomb : Simulation {
 @Component
 class FileCreator : Simulation {
 
-    override suspend fun run(params: Map<String, String>) {
+    override suspend fun run(options: SimulationOptions?) {
         while (true) {
             try {
                 val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".file-creator.run")

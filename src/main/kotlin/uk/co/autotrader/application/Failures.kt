@@ -2,11 +2,6 @@ package uk.co.autotrader.application
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import uk.co.autotrader.application.simulations.ONE_KILOBYTE
-import java.io.IOException
-import java.net.ServerSocket
-import java.net.Socket
-import java.nio.ByteBuffer
 
 interface Failure {
     fun fail(params: Map<String, String> = emptyMap())
@@ -30,22 +25,5 @@ class FailureSimulator(private val failures: Map<String, Failure>) {
             }
         }
         return false
-    }
-}
-
-@Component("directmemoryleak")
-class DirectMemoryLeak : Failure {
-    override fun fail(params: Map<String, String>) {
-        val allocatedMemory = ArrayList<ByteBuffer>()
-        val check =
-                params["limitMB"]?.toIntOrNull()?.let { limit ->
-                    {
-                        limit > allocatedMemory.size
-                    }
-                } ?: { true }
-
-        while (check.invoke()) {
-            allocatedMemory.add(ByteBuffer.allocateDirect(ONE_KILOBYTE * ONE_KILOBYTE))
-        }
     }
 }

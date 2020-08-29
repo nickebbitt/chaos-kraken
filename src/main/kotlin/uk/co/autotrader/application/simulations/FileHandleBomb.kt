@@ -9,7 +9,7 @@ import kotlin.collections.ArrayList
 
 @Component
 class FileHandleBomb : Simulation {
-    override suspend fun run(params: Map<String, String>) {
+    override suspend fun run(options: SimulationOptions?) {
         val readers = ArrayList<FileReader>()
 
         while (true) {

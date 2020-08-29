@@ -10,7 +10,7 @@ private const val CONNECTIONS = 5000
 @Component
 class SelfConnectionsBomb : Simulation {
 
-    override suspend fun run(params: Map<String, String>) {
+    override suspend fun run(options: SimulationOptions?) {
         val openConnections = ArrayList<Socket>()
 
         try {

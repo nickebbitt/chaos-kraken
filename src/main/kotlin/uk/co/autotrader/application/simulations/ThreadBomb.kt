@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 @Component
 class ThreadBomb : Simulation {
 
-    override suspend fun run(params: Map<String, String>) {
+    override suspend fun run(options: SimulationOptions?) {
         while (true) {
             val thread = Thread { while (true); }
             thread.start()

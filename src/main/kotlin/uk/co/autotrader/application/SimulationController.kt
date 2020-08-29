@@ -5,8 +5,11 @@ import kotlinx.coroutines.launch
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.co.autotrader.application.simulations.Cpu
+import uk.co.autotrader.application.simulations.DirectMemoryLeak
+import uk.co.autotrader.application.simulations.DirectMemoryLeakOptions
 import uk.co.autotrader.application.simulations.DiskBomb
 import uk.co.autotrader.application.simulations.FileCreator
 import uk.co.autotrader.application.simulations.FileHandleBomb
@@ -15,6 +18,7 @@ import uk.co.autotrader.application.simulations.MemoryLeak
 import uk.co.autotrader.application.simulations.MemoryLeakOom
 import uk.co.autotrader.application.simulations.SelfConnectionsBomb
 import uk.co.autotrader.application.simulations.StandardOutBomb
+import uk.co.autotrader.application.simulations.StandardOutBombOptions
 import uk.co.autotrader.application.simulations.ThreadBomb
 import uk.co.autotrader.application.simulations.ToggleHealth
 
@@ -32,7 +36,8 @@ class SimulationController(
     private val fileCreator: FileCreator,
     private val standardOutBomb: StandardOutBomb,
     private val fileHandleBomb: FileHandleBomb,
-    private val selfConnectionsBomb: SelfConnectionsBomb
+    private val selfConnectionsBomb: SelfConnectionsBomb,
+    private val directMemoryLeak: DirectMemoryLeak
 ) {
 
     @PostMapping("/cpu")
@@ -100,9 +105,9 @@ class SimulationController(
     }
 
     @PostMapping("/stdoutbomb")
-    fun standardOutBomb(): ResponseEntity<String> {
+    fun standardOutBomb(@RequestParam("periodMillis") periodMillis: Long = 1L): ResponseEntity<String> {
         GlobalScope.launch {
-            standardOutBomb.run()
+            standardOutBomb.run(StandardOutBombOptions(periodMillis))
         }
         return ResponseEntity.ok().body("stdoutbomb simulation started")
     }
@@ -121,5 +126,13 @@ class SimulationController(
             selfConnectionsBomb.run()
         }
         return ResponseEntity.ok().body("selfconnectionsbomb simulation started")
+    }
+
+    @PostMapping("/directmemoryleak")
+    fun directMemoryLeak(@RequestParam("limitMB") limitMB: Int): ResponseEntity<String> {
+        GlobalScope.launch {
+            directMemoryLeak.run(DirectMemoryLeakOptions(limitMB))
+        }
+        return ResponseEntity.ok().body("directmemoryleak simulation started")
     }
 }

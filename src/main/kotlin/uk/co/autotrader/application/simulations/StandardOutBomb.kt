@@ -7,12 +7,15 @@ import kotlin.concurrent.timer
 
 @Component
 class StandardOutBomb : Simulation {
-    override suspend fun run(params: Map<String, String>) {
-        timer(
-                period = params["periodMillis"]?.toLongOrNull() ?: 1L,
-                action = {
-                    println("Standard Out Bomb: " + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                }
-        )
+    override suspend fun run(options: SimulationOptions?) {
+        if (options is StandardOutBombOptions) {
+            timer(period = options.periodMillis,
+                  action = {
+                      println("Standard Out Bomb: " + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                  }
+            )
+        }
     }
 }
+
+data class StandardOutBombOptions(val periodMillis: Long) : SimulationOptions

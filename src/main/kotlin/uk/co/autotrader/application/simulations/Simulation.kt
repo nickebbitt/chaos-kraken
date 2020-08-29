@@ -1,5 +1,7 @@
 package uk.co.autotrader.application.simulations
 
+interface SimulationOptions
+
 interface Simulation {
-    suspend fun run(params: Map<String, String> = emptyMap())
+    suspend fun run(options: SimulationOptions? = null)
 }
